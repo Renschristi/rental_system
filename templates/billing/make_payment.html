@@ -14,9 +14,9 @@
                     <!-- Invoice Summary -->
                     <div class="alert alert-info">
                         <h6>Invoice: {{ invoice.invoice_number }}</h6>
-                        <p class="mb-1"><strong>Total Amount:</strong> ${{ invoice.total_amount }}</p>
-                        <p class="mb-1"><strong>Paid Amount:</strong> ${{ invoice.paid_amount }}</p>
-                        <p class="mb-0"><strong>Remaining Balance:</strong> ${{ remaining_balance }}</p>
+                        <p class="mb-1"><strong>Total Amount:</strong> ₹{{ invoice.total_amount }}</p>
+                        <p class="mb-1"><strong>Paid Amount:</strong> ₹{{ invoice.paid_amount }}</p>
+                        <p class="mb-0"><strong>Remaining Balance:</strong> ₹{{ remaining_balance }}</p>
                     </div>
                     
                     <!-- Payment Form -->
@@ -33,7 +33,7 @@
                             <label for="{{ form.amount.id_for_label }}" class="form-label">Payment Amount *</label>
                             {{ form.amount }}
                             <small class="form-text text-muted">
-                                Maximum: ${{ remaining_balance }}
+                                Maximum: ₹{{ remaining_balance }}
                             </small>
                             {% if form.amount.errors %}
                                 <div class="text-danger">{{ form.amount.errors }}</div>

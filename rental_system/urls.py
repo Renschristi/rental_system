@@ -13,6 +13,8 @@ urlpatterns = [
     path('products/', include('products.urls')),
     path('rentals/', include('rentals.urls')),
     path('billing/', include('billing.urls')),
+    path('', include('static_pages.urls')),  # Terms, About, Contact
+    path('', include('system_config.urls')),  # System Settings
 ]
 
 if settings.DEBUG:

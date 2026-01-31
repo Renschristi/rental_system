@@ -31,6 +31,21 @@ class AddToQuotationView(LoginRequiredMixin, View):
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         quantity = int(request.POST.get('quantity', 1))
+        rental_period_type = request.POST.get('rental_period_type', 'DAILY')
+        variant_id = request.POST.get('variant_id')
+        
+        # Handle variant selection
+        product_variant = None
+        if product.has_variants and variant_id:
+            from products.variant_models import ProductVariant
+            try:
+                product_variant = ProductVariant.objects.get(id=variant_id, product=product, is_active=True)
+            except ProductVariant.DoesNotExist:
+                messages.error(request, 'Selected variant is not available.')
+                return redirect('products:product_detail', pk=product_id)
+        elif product.has_variants:
+            messages.error(request, 'Please select product options.')
+            return redirect('products:product_detail', pk=product_id)
         
         # Validate dates
         try:
@@ -54,8 +69,25 @@ class AddToQuotationView(LoginRequiredMixin, View):
             messages.error(request, 'Quantity must be at least 1.')
             return redirect('products:product_detail', pk=product_id)
         
+        # Get period price
+        from products.rental_period_models import RentalPeriod
+        try:
+            rental_period = RentalPeriod.objects.get(product=product, period_type=rental_period_type)
+            period_price = rental_period.price
+        except RentalPeriod.DoesNotExist:
+            # Fallback to daily rate
+            period_price = product.daily_rate
+            rental_period_type = 'DAILY'
+        
+        # Adjust price for variant
+        if product_variant:
+            period_price = period_price + product_variant.price_adjustment
+        
         # Check preliminary availability (not strict, just a warning)
-        if not product.is_available(start_date, end_date, quantity):
+        if product_variant:
+            if not product_variant.is_available(start_date, end_date, quantity):
+                messages.warning(request, 'Limited availability for selected variant. Please confirm soon.')
+        elif not product.is_available(start_date, end_date, quantity):
             messages.warning(request, 'Limited availability for selected dates. Please confirm soon.')
         
         # Get or create draft quotation
@@ -64,15 +96,18 @@ class AddToQuotationView(LoginRequiredMixin, View):
             status='DRAFT'
         )
         
-        # Check if product already in quotation
+        # Check if product/variant already in quotation
         quotation_line, line_created = QuotationLine.objects.get_or_create(
             quotation=quotation,
             product=product,
+            product_variant=product_variant,
             defaults={
                 'quantity': quantity,
                 'start_date': start_date,
                 'end_date': end_date,
-                'daily_rate': product.daily_rate
+                'daily_rate': product.daily_rate,
+                'rental_period_type': rental_period_type,
+                'period_price': period_price
             }
         )
         
@@ -82,9 +117,12 @@ class AddToQuotationView(LoginRequiredMixin, View):
             quotation_line.start_date = start_date
             quotation_line.end_date = end_date
             quotation_line.daily_rate = product.daily_rate
+            quotation_line.rental_period_type = rental_period_type
+            quotation_line.period_price = period_price
             quotation_line.save()
         
-        messages.success(request, f'{product.name} added to quotation!')
+        product_name = str(product_variant) if product_variant else product.name
+        messages.success(request, f'{product_name} added to quotation!')
         return redirect('rentals:view_quotation')
 
 
@@ -350,7 +388,7 @@ class ReturnRentalView(LoginRequiredMixin, View):
             
             messages.warning(
                 request,
-                f'Rental returned with late fee: ${rental.late_fee}. Invoice updated.'
+                f'Rental returned with late fee: ₹{rental.late_fee}. Invoice updated.'
             )
         else:
             messages.success(request, f'Rental {rental.order_number} returned successfully.')

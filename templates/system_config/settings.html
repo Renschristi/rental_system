@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}System Settings - Rental System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-gear-fill"></i> System Settings</h2>
+                <a href="{% url 'dashboards:home' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Business Information -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-building"></i> Business Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.business_name.id_for_label }}" class="form-label">Business Name</label>
+                                    {{ form.business_name }}
+                                    {% if form.business_name.errors %}
+                                        <div class="text-danger">{{ form.business_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.business_email.id_for_label }}" class="form-label">Business Email</label>
+                                    {{ form.business_email }}
+                                    {% if form.business_email.errors %}
+                                        <div class="text-danger">{{ form.business_email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.business_phone.id_for_label }}" class="form-label">Business Phone</label>
+                                    {{ form.business_phone }}
+                                    {% if form.business_phone.errors %}
+                                        <div class="text-danger">{{ form.business_phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rental Configuration -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-calendar-range"></i> Rental Configuration
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.min_rental_days.id_for_label }}" class="form-label">Minimum Rental Days</label>
+                                    {{ form.min_rental_days }}
+                                    <small class="text-muted">Minimum rental period customers can book</small>
+                                    {% if form.min_rental_days.errors %}
+                                        <div class="text-danger">{{ form.min_rental_days.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.max_rental_days.id_for_label }}" class="form-label">Maximum Rental Days</label>
+                                    {{ form.max_rental_days }}
+                                    <small class="text-muted">Maximum rental period allowed</small>
+                                    {% if form.max_rental_days.errors %}
+                                        <div class="text-danger">{{ form.max_rental_days.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Settings -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-currency-rupee"></i> Financial Settings
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.tax_name.id_for_label }}" class="form-label">Tax Name</label>
+                                    {{ form.tax_name }}
+                                    <small class="text-muted">e.g., GST, VAT</small>
+                                    {% if form.tax_name.errors %}
+                                        <div class="text-danger">{{ form.tax_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.tax_rate.id_for_label }}" class="form-label">Tax Rate (%)</label>
+                                    {{ form.tax_rate }}
+                                    <small class="text-muted">Percentage (e.g., 18 for 18%)</small>
+                                    {% if form.tax_rate.errors %}
+                                        <div class="text-danger">{{ form.tax_rate.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.security_deposit_percentage.id_for_label }}" class="form-label">Security Deposit (%)</label>
+                                    {{ form.security_deposit_percentage }}
+                                    <small class="text-muted">Percentage of order total</small>
+                                    {% if form.security_deposit_percentage.errors %}
+                                        <div class="text-danger">{{ form.security_deposit_percentage.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.late_return_penalty_percentage.id_for_label }}" class="form-label">Late Return Penalty (%)</label>
+                                    {{ form.late_return_penalty_percentage }}
+                                    <small class="text-muted">Penalty for late returns</small>
+                                    {% if form.late_return_penalty_percentage.errors %}
+                                        <div class="text-danger">{{ form.late_return_penalty_percentage.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Currency Settings -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-cash-coin"></i> Currency Settings
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.currency_symbol.id_for_label }}" class="form-label">Currency Symbol</label>
+                                    {{ form.currency_symbol }}
+                                    <small class="text-muted">e.g., ₹, $, €</small>
+                                    {% if form.currency_symbol.errors %}
+                                        <div class="text-danger">{{ form.currency_symbol.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> Last updated: {{ settings.updated_at|date:"Y-m-d H:i" }}
+                            </small>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save"></i> Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="bi bi-shield-check"></i> Security</h6>
+                            <p class="card-text small">Only administrators can access and modify system settings.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="bi bi-arrow-clockwise"></i> Real-time</h6>
+                            <p class="card-text small">Changes take effect immediately after saving.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="bi bi-database"></i> Singleton</h6>
+                            <p class="card-text small">Only one settings instance exists for the entire system.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

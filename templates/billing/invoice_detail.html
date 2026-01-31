@@ -55,38 +55,38 @@
                                             <small>{{ line.start_date }} to {{ line.end_date }}</small>
                                         </td>
                                         <td>{{ line.quantity }}</td>
-                                        <td>${{ line.daily_rate }}</td>
-                                        <td>{{ line.get_duration_days }}</td>
-                                        <td class="text-end">${{ line.get_subtotal }}</td>
+                                        <td>₹{{ line.daily_rate }}</td>
+                                        <td>{{ line.get_duration_days }} days</td>
+                                        <td class="text-end">₹{{ line.get_subtotal }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <th colspan="5" class="text-end">Subtotal:</th>
-                                    <th class="text-end">${{ invoice.subtotal }}</th>
+                                    <th class="text-end">₹{{ invoice.subtotal }}</th>
                                 </tr>
                                 <tr>
                                     <th colspan="5" class="text-end">Tax ({{ 18 }}%):</th>
-                                    <th class="text-end">${{ invoice.tax_amount }}</th>
+                                    <th class="text-end">₹{{ invoice.tax_amount }}</th>
                                 </tr>
                                 {% if invoice.rental_order.late_fee > 0 %}
                                     <tr>
                                         <th colspan="5" class="text-end">Late Fee:</th>
-                                        <th class="text-end text-danger">${{ invoice.rental_order.late_fee }}</th>
+                                        <th class="text-end text-danger">₹{{ invoice.rental_order.late_fee }}</th>
                                     </tr>
                                 {% endif %}
                                 <tr class="table-primary">
                                     <th colspan="5" class="text-end">Total:</th>
-                                    <th class="text-end">${{ invoice.total_amount }}</th>
+                                    <th class="text-end">₹{{ invoice.total_amount }}</th>
                                 </tr>
                                 <tr class="table-success">
                                     <th colspan="5" class="text-end">Paid:</th>
-                                    <th class="text-end">${{ invoice.paid_amount }}</th>
+                                    <th class="text-end">₹{{ invoice.paid_amount }}</th>
                                 </tr>
                                 <tr class="table-warning">
                                     <th colspan="5" class="text-end">Balance Due:</th>
-                                    <th class="text-end">${{ invoice.get_remaining_balance }}</th>
+                                    <th class="text-end">₹{{ invoice.get_remaining_balance }}</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -107,7 +107,7 @@
                             {% for payment in invoice.payments.all %}
                                 <div class="list-group-item">
                                     <div class="d-flex justify-content-between">
-                                        <strong>${{ payment.amount }}</strong>
+                                        <strong>₹{{ payment.amount }}</strong>
                                         <small class="text-muted">{{ payment.payment_date|date:"M d, Y" }}</small>
                                     </div>
                                     <small class="text-muted">{{ payment.get_payment_method_display }}</small>

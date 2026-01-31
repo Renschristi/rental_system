@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms & Conditions{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4"><i class="bi bi-file-text"></i> Terms & Conditions</h1>
+            <p class="text-muted">Last Updated: January 31, 2026</p>
+            
+            <hr class="my-4">
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>1. Rental Agreement</h3>
+                    <p>By renting products through our Rental Management System, you agree to the following terms and conditions. Please read them carefully before placing an order.</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>2. Rental Period & Pricing</h3>
+                    <ul>
+                        <li>Rental prices are calculated based on the selected period (hourly, daily, weekly, monthly, or yearly)</li>
+                        <li>The rental period begins from the pickup time and ends at the return time</li>
+                        <li>All prices are displayed in Indian Rupees (₹)</li>
+                        <li>Prices include 18% GST as applicable</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>3. Reservation & Availability</h3>
+                    <ul>
+                        <li>Products are reserved once you confirm your order</li>
+                        <li>Inventory is managed in real-time to prevent double booking</li>
+                        <li>If a product becomes unavailable after reservation, you will be notified immediately</li>
+                        <li>Vendors have the right to accept or reject rental requests</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>4. Pickup & Return</h3>
+                    <ul>
+                        <li>Products must be picked up from the vendor's location or delivered as per agreement</li>
+                        <li>Late returns will incur a late fee of 10% per day of the rental amount</li>
+                        <li>Products must be returned in the same condition as received</li>
+                        <li>Any damage will be charged separately as per vendor assessment</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>5. Payment Terms</h3>
+                    <ul>
+                        <li>Full payment or deposit must be made before pickup</li>
+                        <li>Partial payments are accepted for eligible orders</li>
+                        <li>Refunds are processed as per vendor policies</li>
+                        <li>Payment methods: Card, UPI, Net Banking</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>6. Deposits & Downpayments</h3>
+                    <ul>
+                        <li>Vendors may require a security deposit for high-value items</li>
+                        <li>Deposits are refundable upon successful return of the product</li>
+                        <li>Deposits will be adjusted against any damage or late fees</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>7. Cancellation Policy</h3>
+                    <ul>
+                        <li>Orders can be cancelled before pickup</li>
+                        <li>Cancellation fees may apply as per vendor policy</li>
+                        <li>Refunds for cancelled orders are processed within 7-10 business days</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>8. Liability & Insurance</h3>
+                    <ul>
+                        <li>Customers are responsible for the safe use of rented products</li>
+                        <li>The platform is not liable for damages caused by product misuse</li>
+                        <li>Insurance options may be available for high-value items</li>
+                        <li>Report any issues immediately to the vendor</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>9. User Accounts</h3>
+                    <ul>
+                        <li>Users must provide accurate information during registration</li>
+                        <li>Account credentials must be kept confidential</li>
+                        <li>Users are responsible for all activities under their account</li>
+                        <li>Admin reserves the right to suspend accounts violating terms</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>10. Vendor Responsibilities</h3>
+                    <ul>
+                        <li>Vendors must ensure product quality and availability</li>
+                        <li>Accurate product descriptions and images must be provided</li>
+                        <li>Vendors must process orders and handle customer queries promptly</li>
+                        <li>GST compliance is the vendor's responsibility</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>11. Disputes & Resolution</h3>
+                    <ul>
+                        <li>Any disputes should be reported to the admin immediately</li>
+                        <li>Platform will mediate between customers and vendors</li>
+                        <li>Legal jurisdiction: As per Indian laws</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>12. Privacy & Data Protection</h3>
+                    <ul>
+                        <li>User data is collected as per our Privacy Policy</li>
+                        <li>Payment information is securely processed</li>
+                        <li>Personal data will not be shared with third parties without consent</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <h5><i class="bi bi-info-circle"></i> Need Help?</h5>
+                <p class="mb-0">If you have any questions about these terms, please <a href="{% url 'static_pages:contact' %}">contact us</a>.</p>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Products
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

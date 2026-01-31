@@ -1,0 +1,193 @@
+{% load static %}
+
+<!-- Product Variant Selector -->
+{% if product.has_variants and variants_data %}
+<div class="variant-selector mb-4">
+    <h6 class="mb-3">Choose Options:</h6>
+    
+    {% regroup product.attribute_lines.all by attribute as attribute_groups %}
+    
+    {% for group in attribute_groups %}
+        <div class="mb-3">
+            <label class="form-label fw-bold">{{ group.grouper.name }} *</label>
+            
+            {% if group.grouper.display_type == 'COLOR' %}
+                <!-- Color Swatches -->
+                <div class="btn-group" role="group" aria-label="{{ group.grouper.name }}">
+                    {% for line in group.list %}
+                        <input type="radio" 
+                               class="btn-check variant-option" 
+                               name="attribute_{{ group.grouper.id }}" 
+                               id="attr_{{ line.id }}" 
+                               value="{{ line.attribute_value.id }}"
+                               data-attribute="{{ group.grouper.id }}">
+                        <label class="btn btn-outline-secondary" 
+                               for="attr_{{ line.id }}"
+                               title="{{ line.attribute_value.value }}">
+                            {% if line.attribute_value.color_code %}
+                                <span class="color-swatch" 
+                                      style="background-color: {{ line.attribute_value.color_code }}; 
+                                             width: 30px; height: 30px; display: inline-block; 
+                                             border-radius: 50%; border: 2px solid #ddd;"></span>
+                            {% else %}
+                                {{ line.attribute_value.value }}
+                            {% endif %}
+                        </label>
+                    {% endfor %}
+                </div>
+            
+            {% elif group.grouper.display_type == 'PILLS' %}
+                <!-- Pills/Chips -->
+                <div class="btn-group" role="group" aria-label="{{ group.grouper.name }}">
+                    {% for line in group.list %}
+                        <input type="radio" 
+                               class="btn-check variant-option" 
+                               name="attribute_{{ group.grouper.id }}" 
+                               id="attr_{{ line.id }}" 
+                               value="{{ line.attribute_value.id }}"
+                               data-attribute="{{ group.grouper.id }}">
+                        <label class="btn btn-outline-primary" for="attr_{{ line.id }}">
+                            {{ line.attribute_value.value }}
+                            {% if line.attribute_value.extra_price > 0 %}
+                                <small class="text-muted">(+₹{{ line.attribute_value.extra_price }})</small>
+                            {% endif %}
+                        </label>
+                    {% endfor %}
+                </div>
+            
+            {% elif group.grouper.display_type == 'SELECT' %}
+                <!-- Dropdown -->
+                <select class="form-select variant-option" 
+                        name="attribute_{{ group.grouper.id }}"
+                        data-attribute="{{ group.grouper.id }}" required>
+                    <option value="">Select {{ group.grouper.name }}</option>
+                    {% for line in group.list %}
+                        <option value="{{ line.attribute_value.id }}">
+                            {{ line.attribute_value.value }}
+                            {% if line.attribute_value.extra_price > 0 %}
+                                (+₹{{ line.attribute_value.extra_price }})
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            
+            {% else %}
+                <!-- Radio Buttons (Default) -->
+                {% for line in group.list %}
+                    <div class="form-check">
+                        <input class="form-check-input variant-option" 
+                               type="radio" 
+                               name="attribute_{{ group.grouper.id }}" 
+                               id="attr_{{ line.id }}" 
+                               value="{{ line.attribute_value.id }}"
+                               data-attribute="{{ group.grouper.id }}">
+                        <label class="form-check-label" for="attr_{{ line.id }}">
+                            {{ line.attribute_value.value }}
+                            {% if line.attribute_value.extra_price > 0 %}
+                                <small class="text-muted">(+₹{{ line.attribute_value.extra_price }})</small>
+                            {% endif %}
+                        </label>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+    <!-- Hidden input to store selected variant ID -->
+    <input type="hidden" id="selected_variant_id" name="variant_id" value="">
+    
+    <!-- Variant Info Display -->
+    <div id="variant_info" class="alert alert-info" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong id="variant_name"></strong>
+                <br>
+                <small>
+                    <span id="variant_availability"></span>
+                </small>
+            </div>
+            <div class="text-end">
+                <h5 class="mb-0 text-primary" id="variant_price"></h5>
+            </div>
+        </div>
+    </div>
+    
+    <div id="variant_error" class="alert alert-warning" style="display: none;">
+        Please select all options to see availability
+    </div>
+</div>
+
+<script>
+// Variant selection logic
+const variantOptions = document.querySelectorAll('.variant-option');
+const variantInfo = document.getElementById('variant_info');
+const variantError = document.getElementById('variant_error');
+const selectedVariantInput = document.getElementById('selected_variant_id');
+
+// Variants data (passed from backend)
+const variants = {{ variants_json|safe }};
+
+variantOptions.forEach(option => {
+    option.addEventListener('change', checkVariant);
+});
+
+function checkVariant() {
+    // Collect selected attributes
+    const selected = {};
+    document.querySelectorAll('.variant-option:checked, .variant-option option:selected').forEach(el => {
+        const attrId = el.dataset.attribute || el.closest('select')?.dataset.attribute;
+        if (attrId && el.value) {
+            selected[attrId] = el.value;
+        }
+    });
+    
+    // Check if all attributes selected
+    const requiredAttributes = {{ required_attributes|safe }};
+    const allSelected = requiredAttributes.every(attrId => selected[attrId]);
+    
+    if (!allSelected) {
+        variantInfo.style.display = 'none';
+        variantError.style.display = 'block';
+        selectedVariantInput.value = '';
+        return;
+    }
+    
+    // Find matching variant
+    const matchingVariant = variants.find(variant => {
+        return variant.attributes.every(attr => selected[attr.attribute_id] == attr.value_id);
+    });
+    
+    if (matchingVariant) {
+        // Show variant info
+        document.getElementById('variant_name').textContent = matchingVariant.name;
+        document.getElementById('variant_price').textContent = '₹' + matchingVariant.price + '/day';
+        document.getElementById('variant_availability').textContent = 
+            matchingVariant.quantity > 0 ? 
+            `${matchingVariant.quantity} available` : 
+            'Out of stock';
+        
+        selectedVariantInput.value = matchingVariant.id;
+        variantInfo.style.display = 'block';
+        variantInfo.className = matchingVariant.quantity > 0 ? 'alert alert-success' : 'alert alert-danger';
+        variantError.style.display = 'none';
+    } else {
+        variantInfo.style.display = 'none';
+        variantError.textContent = 'This combination is not available';
+        variantError.style.display = 'block';
+        selectedVariantInput.value = '';
+    }
+}
+</script>
+
+<style>
+.color-swatch {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-check:checked + label .color-swatch {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}
+</style>
+{% endif %}

@@ -28,8 +28,8 @@
                             <td>{{ invoice.customer.username }}</td>
                             <td>{{ invoice.rental_order.order_number }}</td>
                             <td>{{ invoice.created_at|date:"M d, Y" }}</td>
-                            <td>${{ invoice.total_amount }}</td>
-                            <td>${{ invoice.paid_amount }}</td>
+                            <td>₹{{ invoice.total_amount }}</td>
+                            <td>₹{{ invoice.paid_amount }}</td>
                             <td>
                                 <span class="badge {% if invoice.status == 'PAID' %}bg-success{% elif invoice.status == 'PARTIAL' %}bg-warning{% else %}bg-secondary{% endif %}">
                                     {{ invoice.get_status_display }}

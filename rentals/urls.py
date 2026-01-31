@@ -3,6 +3,7 @@ Rentals URL Configuration
 """
 from django.urls import path
 from . import views
+from .coupon_views import ApplyCouponView, RemoveCouponView
 
 app_name = 'rentals'
 
@@ -12,6 +13,8 @@ urlpatterns = [
     path('quotation/', views.ViewQuotationView.as_view(), name='view_quotation'),
     path('quotation/remove/<int:line_id>/', views.RemoveFromQuotationView.as_view(), name='remove_from_quotation'),
     path('quotation/confirm/', views.ConfirmQuotationView.as_view(), name='confirm_quotation'),
+    path('quotation/apply-coupon/', ApplyCouponView.as_view(), name='apply_coupon'),
+    path('quotation/remove-coupon/', RemoveCouponView.as_view(), name='remove_coupon'),
     
     path('my-rentals/', views.MyRentalsView.as_view(), name='my_rentals'),
     path('rental/<int:pk>/', views.RentalDetailView.as_view(), name='rental_detail'),

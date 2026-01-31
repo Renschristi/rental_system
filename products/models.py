@@ -23,16 +23,29 @@ class Product(models.Model):
     Rentable Products
     Inventory is managed through quantity and reservations
     """
+    PRODUCT_TYPE_CHOICES = [
+        ('GOODS', 'Goods'),
+        ('SERVICE', 'Service'),
+    ]
+    
     name = models.CharField(max_length=200)
+    product_type = models.CharField(max_length=10, choices=PRODUCT_TYPE_CHOICES, default='GOODS')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
     description = models.TextField()
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    
+    # Additional attributes
+    brand = models.CharField(max_length=100, blank=True)
+    color = models.CharField(max_length=50, blank=True)
     
     # Inventory
     quantity = models.PositiveIntegerField(default=0, help_text="Total available quantity")
     
     # Pricing
     daily_rate = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price per day")
+    
+    # Variants support
+    has_variants = models.BooleanField(default=False, help_text="Product has multiple variants")
     
     # Status
     is_published = models.BooleanField(default=True, help_text="Show to customers (Admin only)")

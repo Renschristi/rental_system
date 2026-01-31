@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Rental System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up"></i> System Analytics</h2>
+        <div>
+            <a href="{% url 'dashboards:home' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Date Range Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label"><strong>Time Period</strong></label>
+                    <select name="days" class="form-select" onchange="this.form.submit()">
+                        <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 Days</option>
+                        <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 Days</option>
+                        <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 Days</option>
+                        <option value="180" {% if days == 180 %}selected{% endif %}>Last 6 Months</option>
+                        <option value="365" {% if days == 365 %}selected{% endif %}>Last Year</option>
+                    </select>
+                </div>
+                <div class="col-md-8 text-end">
+                    <small class="text-muted">Showing data for the last {{ days }} days</small>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Rental Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-box-seam"></i> Rental Statistics</h4>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Total Rentals</h6>
+                    <h2 class="mb-0">{{ total_rentals }}</h2>
+                    <small>All rental orders</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Confirmed</h6>
+                    <h2 class="mb-0">{{ confirmed_rentals }}</h2>
+                    <small>Awaiting pickup</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Active</h6>
+                    <h2 class="mb-0">{{ active_rentals }}</h2>
+                    <small>Currently rented</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Returned</h6>
+                    <h2 class="mb-0">{{ returned_rentals }}</h2>
+                    <small>Completed rentals</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Revenue Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-currency-rupee"></i> Revenue Statistics</h4>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Invoiced</h6>
+                    <h2 class="text-primary mb-0">₹{{ total_invoiced|floatformat:2 }}</h2>
+                    <small class="text-muted">All invoices generated</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Paid</h6>
+                    <h2 class="text-success mb-0">₹{{ total_paid|floatformat:2 }}</h2>
+                    <small class="text-muted">Successfully collected</small>
+                    {% if total_invoiced > 0 %}
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ total_paid|floatformat:0|add:'0'|divisibleby:total_invoiced|yesno:'100,50' }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            Collection Rate: {% widthratio total_paid total_invoiced 100 %}%
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Performance -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-star"></i> Top Performing Products</h4>
+        </div>
+        
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if product_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th class="text-center">Total Rentals</th>
+                                        <th class="text-end">Total Revenue</th>
+                                        <th class="text-center">Availability</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in product_stats %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <strong>{{ product.name }}</strong>
+                                                {% if product.brand %}
+                                                    <br><small class="text-muted">{{ product.brand }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if product.category %}
+                                                    <span class="badge bg-secondary">{{ product.category.name }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <strong>{{ product.total_rentals|default:0 }}</strong> times
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-success">₹{{ product.total_revenue|default:0|floatformat:2 }}</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if product.quantity > 0 %}
+                                                    <span class="badge bg-success">{{ product.quantity }} Available</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Out of Stock</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center mb-0">
+                            <i class="bi bi-info-circle"></i> No product data available for the selected period.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Metrics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="bi bi-speedometer2"></i> Key Metrics</h4>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Average Order Value</h6>
+                    {% if total_rentals > 0 %}
+                        <h3 class="mb-0">₹{% widthratio total_invoiced total_rentals 1 %}</h3>
+                    {% else %}
+                        <h3 class="mb-0">₹0</h3>
+                    {% endif %}
+                    <small class="text-muted">Per rental order</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Rental Completion Rate</h6>
+                    {% if total_rentals > 0 %}
+                        <h3 class="mb-0">{% widthratio returned_rentals total_rentals 100 %}%</h3>
+                    {% else %}
+                        <h3 class="mb-0">0%</h3>
+                    {% endif %}
+                    <small class="text-muted">Successfully completed</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Payment Collection Rate</h6>
+                    {% if total_invoiced > 0 %}
+                        <h3 class="mb-0">{% widthratio total_paid total_invoiced 100 %}%</h3>
+                    {% else %}
+                        <h3 class="mb-0">0%</h3>
+                    {% endif %}
+                    <small class="text-muted">Invoice to payment</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="mb-3">Export Analytics</h5>
+                    <button class="btn btn-outline-primary me-2" disabled>
+                        <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-outline-success me-2" disabled>
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </button>
+                    <button class="btn btn-outline-info" disabled>
+                        <i class="bi bi-file-earmark-text"></i> Export CSV
+                    </button>
+                    <br>
+                    <small class="text-muted mt-2 d-block">Export functionality coming soon</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,11 +14,12 @@
                         <thead>
                             <tr>
                                 <th>Product</th>
+                                <th>Rental Period</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
                                 <th>Duration</th>
                                 <th>Quantity</th>
-                                <th>Daily Rate</th>
+                                <th>Rate</th>
                                 <th>Subtotal</th>
                                 <th>Action</th>
                             </tr>
@@ -28,13 +29,22 @@
                                 <tr>
                                     <td>
                                         <strong>{{ line.product.name }}</strong>
+                                        {% if line.product_variant %}
+                                            <br>
+                                            <small class="text-muted">{{ line.product_variant }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ line.get_rental_period_type_display }}
+                                        </span>
                                     </td>
                                     <td>{{ line.start_date }}</td>
                                     <td>{{ line.end_date }}</td>
                                     <td>{{ line.get_duration_days }} days</td>
                                     <td>{{ line.quantity }}</td>
-                                    <td>${{ line.daily_rate }}</td>
-                                    <td><strong>${{ line.get_subtotal }}</strong></td>
+                                    <td>₹{{ line.period_price }}</td>
+                                    <td><strong>₹{{ line.get_subtotal }}</strong></td>
                                     <td>
                                         <form method="post" action="{% url 'rentals:remove_from_quotation' line.id %}" class="d-inline">
                                             {% csrf_token %}
@@ -49,11 +59,73 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="6" class="text-end">Total:</th>
-                                <th colspan="2">${{ quotation.get_total }}</th>
+                                <th colspan="7" class="text-end">Subtotal:</th>
+                                <th colspan="2">₹{{ quotation.get_subtotal }}</th>
+                            </tr>
+                            {% if quotation.applied_coupon %}
+                                <tr class="table-success">
+                                    <th colspan="7" class="text-end">
+                                        Discount ({{ quotation.applied_coupon.code }}):
+                                        {% if quotation.applied_coupon.discount_type == 'PERCENTAGE' %}
+                                            {{ quotation.applied_coupon.discount_value }}%
+                                        {% else %}
+                                            Fixed
+                                        {% endif %}
+                                    </th>
+                                    <th colspan="2">-₹{{ quotation.discount_amount }}</th>
+                                </tr>
+                            {% endif %}
+                            <tr class="table-primary">
+                                <th colspan="7" class="text-end">Total:</th>
+                                <th colspan="2">₹{{ quotation.get_total }}</th>
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+                
+                <hr>
+                
+                <!-- Coupon Section -->
+                <div class="row mb-3">
+                    <div class="col-md-6 offset-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Have a Coupon Code?</h6>
+                                
+                                {% if quotation.applied_coupon %}
+                                    <div class="alert alert-success d-flex justify-content-between align-items-center">
+                                        <span>
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Coupon <strong>{{ quotation.applied_coupon.code }}</strong> applied!
+                                        </span>
+                                        <form method="post" action="{% url 'rentals:remove_coupon' %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <form method="post" action="{% url 'rentals:apply_coupon' %}">
+                                        {% csrf_token %}
+                                        <div class="input-group">
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   name="coupon_code" 
+                                                   placeholder="Enter coupon code"
+                                                   required>
+                                            <button class="btn btn-primary" type="submit">
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <small class="text-muted">
+                                        Enter your coupon code to get discounts
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <hr>

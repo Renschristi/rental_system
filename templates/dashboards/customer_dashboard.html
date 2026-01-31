@@ -84,7 +84,7 @@
                                             {{ rental.get_status_display }}
                                         </span>
                                     </td>
-                                    <td>${{ rental.get_total }}</td>
+                                    <td>₹{{ rental.get_total }}</td>
                                     <td>
                                         <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-sm btn-primary">
                                             View

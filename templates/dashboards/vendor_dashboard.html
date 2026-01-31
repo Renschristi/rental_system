@@ -12,7 +12,7 @@
             <div class="card text-white bg-success">
                 <div class="card-body">
                     <h6 class="card-title">Total Earnings</h6>
-                    <h3>${{ total_earnings }}</h3>
+                    <h3>₹{{ total_earnings }}</h3>
                 </div>
             </div>
         </div>
@@ -98,7 +98,7 @@
                                             {{ rental.get_status_display }}
                                         </span>
                                     </td>
-                                    <td>${{ rental.get_total }}</td>
+                                    <td>₹{{ rental.get_total }}</td>
                                     <td>
                                         <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-sm btn-primary">
                                             View

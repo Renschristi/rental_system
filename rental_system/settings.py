@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'rentals',
     'billing',
     'dashboards',
+    'static_pages',
+    'system_config',
 ]
 
 MIDDLEWARE = [
@@ -125,6 +127,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'dashboards:home'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# Email Configuration (for password reset)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Development: prints to console
+# For production, use:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+# EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = 'noreply@rentalsystem.com'
 
 # Rental System Settings
 RENTAL_LATE_FEE_PERCENT = 10  # 10% late fee per day

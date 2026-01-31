@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}My Wishlist{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-heart"></i> My Wishlist</h2>
+            <p class="text-muted">Products you've saved for later</p>
+        </div>
+    </div>
+    
+    {% if wishlist_items %}
+        <div class="row">
+            {% for item in wishlist_items %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white text-center" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-box-seam" style="font-size: 4rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.product.name }}</h5>
+                            {% if item.product.brand %}
+                                <p class="text-muted mb-1"><small><i class="bi bi-tag"></i> {{ item.product.brand }}</small></p>
+                            {% endif %}
+                            <p class="card-text text-muted">{{ item.product.description|truncatewords:15 }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary fs-6">₹{{ item.product.daily_rate }}/day</span>
+                                {% if item.product.quantity > 0 %}
+                                    <span class="badge bg-success">In Stock</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% endif %}
+                            </div>
+                            
+                            <small class="text-muted">Added on: {{ item.added_at|date:"M d, Y" }}</small>
+                        </div>
+                        
+                        <div class="card-footer bg-white">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'products:product_detail' item.product.id %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i> View Details
+                                </a>
+                                <form method="post" action="{% url 'products:remove_from_wishlist' item.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Continue Shopping
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-heart" style="font-size: 4rem;"></i>
+            <h4 class="mt-3">Your wishlist is empty</h4>
+            <p>Save products you like for later!</p>
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-search"></i> Browse Products
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4"><i class="bi bi-info-circle"></i> About Us</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Welcome to Rental Management System</h3>
+                    <p class="lead">Your trusted platform for renting equipment, electronics, furniture, and more!</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Our Mission</h3>
+                    <p>We aim to connect customers with reliable vendors, making renting easy, affordable, and transparent. Our platform ensures seamless reservation management, preventing double bookings and providing real-time inventory updates.</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>What We Offer</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul>
+                                <li><i class="bi bi-check-circle text-success"></i> Wide range of products</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Verified vendors</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Secure payment processing</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Real-time availability</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul>
+                                <li><i class="bi bi-check-circle text-success"></i> Flexible rental periods</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Transparent pricing</li>
+                                <li><i class="bi bi-check-circle text-success"></i> GST-compliant invoicing</li>
+                                <li><i class="bi bi-check-circle text-success"></i> 24/7 customer support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>For Customers</h3>
+                    <p>Browse thousands of products, compare prices, and rent with confidence. Our advanced reservation system ensures your selected items are available when you need them.</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>For Vendors</h3>
+                    <p>Join our platform to reach more customers, manage your inventory efficiently, and grow your rental business. We provide complete tools for order management, invoicing, and analytics.</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{% url 'static_pages:contact' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-envelope"></i> Contact Us
+                </a>
+                <a href="{% url 'products:product_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-box-seam"></i> Browse Products
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

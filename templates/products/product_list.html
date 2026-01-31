@@ -18,17 +18,80 @@
         </div>
     </div>
     
-    <!-- Category Filter -->
-    <div class="mb-4">
-        <div class="btn-group" role="group">
-            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary {% if not request.GET.category %}active{% endif %}">
-                All
-            </a>
-            {% for category in categories %}
-                <a href="?category={{ category.id }}" class="btn btn-outline-secondary {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}">
-                    {{ category.name }}
-                </a>
-            {% endfor %}
+    <!-- Advanced Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-funnel"></i> Filters
+                <button class="btn btn-sm btn-link float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                    Toggle
+                </button>
+            </h5>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body">
+                <form method="get" id="filterForm">
+                    <div class="row">
+                        <!-- Category Filter -->
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label"><strong>Category</strong></label>
+                            <select name="category" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:'s' %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Brand Filter -->
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label"><strong>Brand</strong></label>
+                            <select name="brand" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                <option value="">All Brands</option>
+                                {% for brand in brands %}
+                                    <option value="{{ brand }}" {% if request.GET.brand == brand %}selected{% endif %}>
+                                        {{ brand }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Color Filter -->
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label"><strong>Color</strong></label>
+                            <select name="color" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                <option value="">All Colors</option>
+                                {% for color in colors %}
+                                    <option value="{{ color }}" {% if request.GET.color == color %}selected{% endif %}>
+                                        {{ color }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Price Range Filter -->
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label"><strong>Price Range (₹/day)</strong></label>
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="price_min" class="form-control" placeholder="Min" value="{{ request.GET.price_min }}">
+                                <span class="input-group-text">-</span>
+                                <input type="number" name="price_max" class="form-control" placeholder="Max" value="{{ request.GET.price_max }}">
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary mt-2 w-100">Apply Price</button>
+                        </div>
+                    </div>
+                    
+                    {% if request.GET.category or request.GET.brand or request.GET.color or request.GET.price_min or request.GET.price_max %}
+                        <div class="text-end">
+                            <a href="{% url 'products:product_list' %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Clear All Filters
+                            </a>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
         </div>
     </div>
     
@@ -47,16 +110,34 @@
                     
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
+                        {% if product.brand %}
+                            <p class="text-muted mb-1"><small><i class="bi bi-tag"></i> {{ product.brand }}</small></p>
+                        {% endif %}
+                        {% if product.color %}
+                            <p class="text-muted mb-2"><small><i class="bi bi-palette"></i> {{ product.color }}</small></p>
+                        {% endif %}
                         <p class="card-text text-muted">{{ product.description|truncatewords:15 }}</p>
                         
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-primary">${{ product.daily_rate }}/day</span>
+                            <span class="badge bg-primary">₹{{ product.daily_rate }}/day</span>
                             <span class="text-muted">Qty: {{ product.quantity }}</span>
                         </div>
-                        
-                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-primary w-100">
-                            Rent Now
-                        </a>
+                    </div>
+                    
+                    <div class="card-footer bg-white">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'products:product_detail' product.id %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-cart-plus"></i> Rent Now
+                            </a>
+                            {% if user.is_authenticated and user.is_customer %}
+                                <form method="post" action="{% url 'products:add_to_wishlist' product.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="bi bi-heart"></i> Save for Later
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

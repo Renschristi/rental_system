@@ -12,7 +12,7 @@
             <div class="card text-white bg-success">
                 <div class="card-body">
                     <h6 class="card-title">Total Revenue</h6>
-                    <h3>${{ total_revenue }}</h3>
+                    <h3>₹{{ total_revenue }}</h3>
                 </div>
             </div>
         </div>
@@ -49,8 +49,11 @@
                 <div class="card-body">
                     <h5 class="card-title">Quick Actions</h5>
                     <div class="d-grid gap-2 d-md-flex">
+                        <a href="{% url 'system_config:settings' %}" class="btn btn-warning">
+                            <i class="bi bi-gear-fill"></i> System Settings
+                        </a>
                         <a href="/admin/" class="btn btn-primary">
-                            <i class="bi bi-gear"></i> Admin Panel
+                            <i class="bi bi-shield-lock"></i> Admin Panel
                         </a>
                         <a href="{% url 'dashboards:analytics' %}" class="btn btn-info">
                             <i class="bi bi-graph-up"></i> View Analytics
@@ -87,7 +90,7 @@
                                         <tr>
                                             <td>{{ product.name }}</td>
                                             <td>{{ product.rental_count }}</td>
-                                            <td>${{ product.daily_rate }}</td>
+                                            <td>₹{{ product.daily_rate }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -110,11 +113,11 @@
                     <div class="row">
                         <div class="col-6">
                             <p><strong>Total Revenue (Paid):</strong></p>
-                            <h4 class="text-success">${{ total_revenue }}</h4>
+                            <h4 class="text-success">₹{{ total_revenue }}</h4>
                         </div>
                         <div class="col-6">
                             <p><strong>Pending Payments:</strong></p>
-                            <h4 class="text-warning">${{ pending_payment_amount }}</h4>
+                            <h4 class="text-warning">₹{{ pending_payment_amount }}</h4>
                         </div>
                     </div>
                 </div>
@@ -152,7 +155,7 @@
                                             {{ rental.get_status_display }}
                                         </span>
                                     </td>
-                                    <td>${{ rental.get_total }}</td>
+                                    <td>₹{{ rental.get_total }}</td>
                                     <td>
                                         <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-sm btn-primary">
                                             View

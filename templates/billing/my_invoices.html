@@ -34,9 +34,9 @@
                                     <span class="badge bg-danger">Overdue</span>
                                 {% endif %}
                             </td>
-                            <td>${{ invoice.total_amount }}</td>
-                            <td>${{ invoice.paid_amount }}</td>
-                            <td><strong>${{ invoice.get_remaining_balance }}</strong></td>
+                            <td>₹{{ invoice.total_amount }}</td>
+                            <td>₹{{ invoice.paid_amount }}</td>
+                            <td><strong>₹{{ invoice.get_remaining_balance }}</strong></td>
                             <td>
                                 <span class="badge {% if invoice.status == 'PAID' %}bg-success{% elif invoice.status == 'PARTIAL' %}bg-warning{% else %}bg-secondary{% endif %}">
                                     {{ invoice.get_status_display }}

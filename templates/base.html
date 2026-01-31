@@ -54,6 +54,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'products:wishlist' %}">
+                                    <i class="bi bi-heart"></i> Wishlist
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{% url 'rentals:my_rentals' %}">My Rentals</a>
                             </li>
                             <li class="nav-item">
@@ -74,9 +79,25 @@
                                 <a class="nav-link" href="{% url 'dashboards:analytics' %}">Analytics</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'system_config:settings' %}">
+                                    <i class="bi bi-gear-fill"></i> Settings
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="/admin/">Admin Panel</a>
                             </li>
                         {% endif %}
+                        
+                        <!-- Static Pages -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'static_pages:about' %}">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'static_pages:terms' %}">Terms</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'static_pages:contact' %}">Contact</a>
+                        </li>
                     {% endif %}
                 </ul>
                 

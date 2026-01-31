@@ -73,7 +73,7 @@ class MakePaymentView(LoginRequiredMixin, View):
             # Validate payment amount
             remaining = invoice.get_remaining_balance()
             if payment.amount > remaining:
-                messages.error(request, f'Payment amount cannot exceed remaining balance (${remaining}).')
+                messages.error(request, f'Payment amount cannot exceed remaining balance (₹{remaining}).')
                 return render(request, 'billing/make_payment.html', {
                     'invoice': invoice,
                     'form': form,
@@ -90,7 +90,7 @@ class MakePaymentView(LoginRequiredMixin, View):
             
             payment.save()  # This automatically updates invoice status
             
-            messages.success(request, f'Payment of ${payment.amount} processed successfully!')
+            messages.success(request, f'Payment of ₹{payment.amount} processed successfully!')
             return redirect('billing:invoice_detail', pk=invoice.id)
         
         context = {
@@ -206,9 +206,9 @@ class DownloadInvoiceView(LoginRequiredMixin, View):
         for line in invoice.rental_order.lines.all():
             p.drawString(1 * inch, y, line.product.name[:30])
             p.drawString(4 * inch, y, str(line.quantity))
-            p.drawString(5 * inch, y, f"${line.daily_rate}")
+            p.drawString(5 * inch, y, f"₹{line.daily_rate}")
             p.drawString(6 * inch, y, str(line.get_duration_days()))
-            p.drawString(7 * inch, y, f"${line.get_subtotal()}")
+            p.drawString(7 * inch, y, f"₹{line.get_subtotal()}")
             y -= 0.25 * inch
         
         y -= 0.3 * inch
@@ -218,31 +218,31 @@ class DownloadInvoiceView(LoginRequiredMixin, View):
         # Totals
         p.setFont("Helvetica", 12)
         p.drawString(6 * inch, y, "Subtotal:")
-        p.drawString(7 * inch, y, f"${invoice.subtotal}")
+        p.drawString(7 * inch, y, f"₹{invoice.subtotal}")
         y -= 0.25 * inch
         
         p.drawString(6 * inch, y, "Tax:")
-        p.drawString(7 * inch, y, f"${invoice.tax_amount}")
+        p.drawString(7 * inch, y, f"₹{invoice.tax_amount}")
         y -= 0.25 * inch
         
         if invoice.rental_order.late_fee > 0:
             p.drawString(6 * inch, y, "Late Fee:")
-            p.drawString(7 * inch, y, f"${invoice.rental_order.late_fee}")
+            p.drawString(7 * inch, y, f"₹{invoice.rental_order.late_fee}")
             y -= 0.25 * inch
         
         p.setFont("Helvetica-Bold", 14)
         p.drawString(6 * inch, y, "Total:")
-        p.drawString(7 * inch, y, f"${invoice.total_amount}")
+        p.drawString(7 * inch, y, f"₹{invoice.total_amount}")
         y -= 0.25 * inch
         
         p.setFont("Helvetica", 12)
         p.drawString(6 * inch, y, "Paid:")
-        p.drawString(7 * inch, y, f"${invoice.paid_amount}")
+        p.drawString(7 * inch, y, f"₹{invoice.paid_amount}")
         y -= 0.25 * inch
         
         p.setFont("Helvetica-Bold", 12)
         p.drawString(6 * inch, y, "Balance:")
-        p.drawString(7 * inch, y, f"${invoice.get_remaining_balance()}")
+        p.drawString(7 * inch, y, f"₹{invoice.get_remaining_balance()}")
         
         # Footer
         p.setFont("Helvetica", 10)

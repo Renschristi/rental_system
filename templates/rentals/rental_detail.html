@@ -58,8 +58,8 @@
                                             {{ line.start_date }} to {{ line.end_date }}
                                             <br><small class="text-muted">({{ line.get_duration_days }} days)</small>
                                         </td>
-                                        <td>${{ line.daily_rate }}</td>
-                                        <td><strong>${{ line.get_subtotal }}</strong></td>
+                                        <td>₹{{ line.daily_rate }}</td>
+                                        <td><strong>₹{{ line.get_subtotal }}</strong></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -67,12 +67,12 @@
                                 {% if rental.late_fee > 0 %}
                                     <tr>
                                         <th colspan="4" class="text-end">Late Fee:</th>
-                                        <th class="text-danger">${{ rental.late_fee }}</th>
+                                        <th class="text-danger">₹{{ rental.late_fee }}</th>
                                     </tr>
                                 {% endif %}
                                 <tr>
-                                    <th colspan="4" class="text-end">Total:</th>
-                                    <th>${{ rental.get_total }}</th>
+                                    <th colspan="3">Total</th>
+                                    <th>₹{{ rental.get_total }}</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -94,9 +94,9 @@
                             <p>Status: <span class="badge bg-{% if invoice.status == 'PAID' %}success{% else %}warning{% endif %}">
                                 {{ invoice.get_status_display }}
                             </span></p>
-                            <p>Total: <strong>${{ invoice.total_amount }}</strong></p>
-                            <p>Paid: <strong>${{ invoice.paid_amount }}</strong></p>
-                            <p>Balance: <strong>${{ invoice.get_remaining_balance }}</strong></p>
+                            <p>Total: <strong>₹{{ invoice.total_amount }}</strong></p>
+                            <p>Paid: <strong>₹{{ invoice.paid_amount }}</strong></p>
+                            <p>Balance: <strong>₹{{ invoice.get_remaining_balance }}</strong></p>
                             
                             <hr>
                             

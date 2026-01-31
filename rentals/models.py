@@ -7,6 +7,9 @@ from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
 
+# Import coupon models
+from .coupon_models import Coupon, CouponUsage
+
 
 class Quotation(models.Model):
     """
@@ -22,6 +25,10 @@ class Quotation(models.Model):
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='quotations')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='DRAFT')
     
+    # Coupon support
+    applied_coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True, related_name='quotations')
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
@@ -29,9 +36,14 @@ class Quotation(models.Model):
     def __str__(self):
         return f"Quotation #{self.id} - {self.customer.username}"
     
-    def get_total(self):
-        """Calculate total quotation amount"""
+    def get_subtotal(self):
+        """Calculate subtotal before discount"""
         return sum(line.get_subtotal() for line in self.lines.all())
+    
+    def get_total(self):
+        """Calculate total quotation amount after discount"""
+        subtotal = self.get_subtotal()
+        return subtotal - self.discount_amount
     
     def can_confirm(self):
         """Check if quotation can be confirmed (all items available)"""
@@ -50,14 +62,22 @@ class QuotationLine(models.Model):
     """
     quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='lines')
     product = models.ForeignKey('products.Product', on_delete=models.CASCADE)
+    product_variant = models.ForeignKey('products.ProductVariant', on_delete=models.SET_NULL, null=True, blank=True, related_name='quotation_lines')
     quantity = models.PositiveIntegerField(default=1)
     
     # Rental period
     start_date = models.DateField()
     end_date = models.DateField()
+    rental_period_type = models.CharField(
+        max_length=10,
+        choices=[('HOURLY', 'Per Hour'), ('DAILY', 'Per Day'), ('WEEKLY', 'Per Week'), 
+                 ('MONTHLY', 'Per Month'), ('YEARLY', 'Per Year')],
+        default='DAILY'
+    )
     
     # Pricing (snapshot at quotation time)
     daily_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    period_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Price for selected period")
     
     def __str__(self):
         return f"{self.product.name} x{self.quantity}"
@@ -68,8 +88,24 @@ class QuotationLine(models.Model):
         return max(delta.days, 1)  # Minimum 1 day
     
     def get_subtotal(self):
-        """Calculate line subtotal"""
-        return self.daily_rate * self.quantity * self.get_duration_days()
+        """Calculate line subtotal based on rental period"""
+        days = self.get_duration_days()
+        
+        if self.rental_period_type == 'HOURLY':
+            return self.period_price * Decimal(str(days * 24)) * self.quantity
+        elif self.rental_period_type == 'DAILY':
+            return self.period_price * Decimal(str(days)) * self.quantity
+        elif self.rental_period_type == 'WEEKLY':
+            weeks = Decimal(str(days)) / Decimal('7')
+            return self.period_price * weeks * self.quantity
+        elif self.rental_period_type == 'MONTHLY':
+            months = Decimal(str(days)) / Decimal('30')
+            return self.period_price * months * self.quantity
+        elif self.rental_period_type == 'YEARLY':
+            years = Decimal(str(days)) / Decimal('365')
+            return self.period_price * years * self.quantity
+        
+        return self.daily_rate * self.quantity * days
     
     class Meta:
         unique_together = ['quotation', 'product']

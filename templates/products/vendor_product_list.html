@@ -34,7 +34,7 @@
                             </td>
                             <td>{{ product.category|default:"Uncategorized" }}</td>
                             <td>{{ product.quantity }}</td>
-                            <td>${{ product.daily_rate }}</td>
+                            <td>₹{{ product.daily_rate }}</td>
                             <td>
                                 {% if product.is_published %}
                                     <span class="badge bg-success">Published</span>
