@@ -1,0 +1,41 @@
+# Environment variables
+.env
+
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Django
+*.sqlite3
+db.sqlite3
+/media/
+/staticfiles/
+*.log
+
+# Virtual Environment
+/venv/
+/env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+sqlite_backup.json
+dump_sqlite_data.py
+reset_admin.py
+
+# Migration backups
+*/migrations/*.pyc

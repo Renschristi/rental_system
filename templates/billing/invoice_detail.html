@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - Rental System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Invoice {{ invoice.invoice_number }}</h4>
+                    <span class="badge {% if invoice.status == 'PAID' %}bg-success{% elif invoice.status == 'PARTIAL' %}bg-warning{% else %}bg-secondary{% endif %} fs-6">
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Invoice Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Bill To:</h6>
+                            <p>
+                                <strong>{{ invoice.customer.get_full_name|default:invoice.customer.username }}</strong><br>
+                                {{ invoice.customer.email }}<br>
+                                {{ invoice.customer.phone|default:"" }}<br>
+                                {{ invoice.customer.address|default:"" }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <p>
+                                <strong>Invoice Date:</strong> {{ invoice.created_at|date:"M d, Y" }}<br>
+                                <strong>Due Date:</strong> {{ invoice.due_date }}<br>
+                                <strong>Order Number:</strong> {{ invoice.rental_order.order_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Line Items -->
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Period</th>
+                                    <th>Qty</th>
+                                    <th>Rate/Day</th>
+                                    <th>Days</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line in invoice.rental_order.lines.all %}
+                                    <tr>
+                                        <td>{{ line.product.name }}</td>
+                                        <td>
+                                            <small>{{ line.start_date }} to {{ line.end_date }}</small>
+                                        </td>
+                                        <td>{{ line.quantity }}</td>
+                                        <td>${{ line.daily_rate }}</td>
+                                        <td>{{ line.get_duration_days }}</td>
+                                        <td class="text-end">${{ line.get_subtotal }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="5" class="text-end">Subtotal:</th>
+                                    <th class="text-end">${{ invoice.subtotal }}</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="5" class="text-end">Tax ({{ 18 }}%):</th>
+                                    <th class="text-end">${{ invoice.tax_amount }}</th>
+                                </tr>
+                                {% if invoice.rental_order.late_fee > 0 %}
+                                    <tr>
+                                        <th colspan="5" class="text-end">Late Fee:</th>
+                                        <th class="text-end text-danger">${{ invoice.rental_order.late_fee }}</th>
+                                    </tr>
+                                {% endif %}
+                                <tr class="table-primary">
+                                    <th colspan="5" class="text-end">Total:</th>
+                                    <th class="text-end">${{ invoice.total_amount }}</th>
+                                </tr>
+                                <tr class="table-success">
+                                    <th colspan="5" class="text-end">Paid:</th>
+                                    <th class="text-end">${{ invoice.paid_amount }}</th>
+                                </tr>
+                                <tr class="table-warning">
+                                    <th colspan="5" class="text-end">Balance Due:</th>
+                                    <th class="text-end">${{ invoice.get_remaining_balance }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Payment History -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6>Payment History</h6>
+                </div>
+                <div class="card-body">
+                    {% if invoice.payments.all %}
+                        <div class="list-group list-group-flush">
+                            {% for payment in invoice.payments.all %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>${{ payment.amount }}</strong>
+                                        <small class="text-muted">{{ payment.payment_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ payment.get_payment_method_display }}</small>
+                                    {% if payment.transaction_id %}
+                                        <br><small>Txn: {{ payment.transaction_id }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No payments yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6>Actions</h6>
+                </div>
+                <div class="card-body">
+                    {% if invoice.get_remaining_balance > 0 %}
+                        <a href="{% url 'billing:make_payment' invoice.id %}" class="btn btn-success w-100 mb-2">
+                            <i class="bi bi-credit-card"></i> Make Payment
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'billing:download_invoice' invoice.id %}" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-download"></i> Download PDF
+                    </a>
+                    
+                    <a href="{% url 'billing:my_invoices' %}" class="btn btn-secondary w-100">
+                        <i class="bi bi-arrow-left"></i> Back to Invoices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

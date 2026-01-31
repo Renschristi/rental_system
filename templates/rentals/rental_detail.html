@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Rental {{ rental.order_number }} - Rental System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Rental Order: {{ rental.order_number }}</h2>
+        <span class="badge {% if rental.status == 'CONFIRMED' %}bg-info{% elif rental.status == 'ACTIVE' %}bg-success{% elif rental.status == 'RETURNED' %}bg-secondary{% else %}bg-warning{% endif %} fs-5">
+            {{ rental.get_status_display }}
+        </span>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> {{ rental.customer.get_full_name|default:rental.customer.username }}</p>
+                            <p><strong>Email:</strong> {{ rental.customer.email }}</p>
+                            <p><strong>Phone:</strong> {{ rental.customer.phone|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Order Date:</strong> {{ rental.created_at|date:"M d, Y H:i" }}</p>
+                            {% if rental.pickup_date %}
+                                <p><strong>Pickup Date:</strong> {{ rental.pickup_date|date:"M d, Y H:i" }}</p>
+                            {% endif %}
+                            {% if rental.return_date %}
+                                <p><strong>Return Date:</strong> {{ rental.return_date|date:"M d, Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6>Rental Items</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Period</th>
+                                    <th>Daily Rate</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line in rental.lines.all %}
+                                    <tr>
+                                        <td>{{ line.product.name }}</td>
+                                        <td>{{ line.quantity }}</td>
+                                        <td>
+                                            {{ line.start_date }} to {{ line.end_date }}
+                                            <br><small class="text-muted">({{ line.get_duration_days }} days)</small>
+                                        </td>
+                                        <td>${{ line.daily_rate }}</td>
+                                        <td><strong>${{ line.get_subtotal }}</strong></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                {% if rental.late_fee > 0 %}
+                                    <tr>
+                                        <th colspan="4" class="text-end">Late Fee:</th>
+                                        <th class="text-danger">${{ rental.late_fee }}</th>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <th colspan="4" class="text-end">Total:</th>
+                                    <th>${{ rental.get_total }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Invoice Card -->
+            {% if rental.invoices.first %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6>Invoice</h6>
+                    </div>
+                    <div class="card-body">
+                        {% with invoice=rental.invoices.first %}
+                            <p><strong>{{ invoice.invoice_number }}</strong></p>
+                            <p>Status: <span class="badge bg-{% if invoice.status == 'PAID' %}success{% else %}warning{% endif %}">
+                                {{ invoice.get_status_display }}
+                            </span></p>
+                            <p>Total: <strong>${{ invoice.total_amount }}</strong></p>
+                            <p>Paid: <strong>${{ invoice.paid_amount }}</strong></p>
+                            <p>Balance: <strong>${{ invoice.get_remaining_balance }}</strong></p>
+                            
+                            <hr>
+                            
+                            <a href="{% url 'billing:invoice_detail' invoice.id %}" class="btn btn-primary btn-sm w-100 mb-2">
+                                View Invoice
+                            </a>
+                            
+                            {% if invoice.get_remaining_balance > 0 %}
+                                <a href="{% url 'billing:make_payment' invoice.id %}" class="btn btn-success btn-sm w-100">
+                                    Make Payment
+                                </a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6>Actions</h6>
+                </div>
+                <div class="card-body">
+                    {% if user.is_customer %}
+                        <a href="{% url 'rentals:my_rentals' %}" class="btn btn-secondary btn-sm w-100">
+                            <i class="bi bi-arrow-left"></i> Back to My Rentals
+                        </a>
+                    {% elif user.is_vendor %}
+                        {% if rental.status == 'CONFIRMED' %}
+                            <form method="post" action="{% url 'rentals:pickup_rental' rental.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm w-100"
+                                        onclick="return confirm('Mark as picked up?')">
+                                    <i class="bi bi-box-arrow-up"></i> Mark as Picked Up
+                                </button>
+                            </form>
+                        {% elif rental.status == 'ACTIVE' %}
+                            <form method="post" action="{% url 'rentals:return_rental' rental.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm w-100"
+                                        onclick="return confirm('Process return? Late fees will be calculated if applicable.')">
+                                    <i class="bi bi-box-arrow-in-down"></i> Process Return
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <a href="{% url 'rentals:vendor_rentals' %}" class="btn btn-secondary btn-sm w-100 mt-2">
+                            <i class="bi bi-arrow-left"></i> Back to Rentals
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

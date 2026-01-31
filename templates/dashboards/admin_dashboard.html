@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Rental System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6 class="card-title">Total Revenue</h6>
+                    <h3>${{ total_revenue }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="card-title">Active Rentals</h6>
+                    <h3>{{ active_rentals }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h6 class="card-title">Total Customers</h6>
+                    <h3>{{ total_customers }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title">Total Vendors</h6>
+                    <h3>{{ total_vendors }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="/admin/" class="btn btn-primary">
+                            <i class="bi bi-gear"></i> Admin Panel
+                        </a>
+                        <a href="{% url 'dashboards:analytics' %}" class="btn btn-info">
+                            <i class="bi bi-graph-up"></i> View Analytics
+                        </a>
+                        <a href="{% url 'products:product_list' %}" class="btn btn-success">
+                            <i class="bi bi-box-seam"></i> All Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Most Rented Products -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Most Rented Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if most_rented %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Rentals</th>
+                                        <th>Daily Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in most_rented %}
+                                        <tr>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.rental_count }}</td>
+                                            <td>${{ product.daily_rate }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Payments -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Financial Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Total Revenue (Paid):</strong></p>
+                            <h4 class="text-success">${{ total_revenue }}</h4>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Pending Payments:</strong></p>
+                            <h4 class="text-warning">${{ pending_payment_amount }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Recent Orders</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Order Number</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rental in recent_orders %}
+                                <tr>
+                                    <td>{{ rental.order_number }}</td>
+                                    <td>{{ rental.customer.username }}</td>
+                                    <td>{{ rental.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge {% if rental.status == 'CONFIRMED' %}bg-info{% elif rental.status == 'ACTIVE' %}bg-success{% elif rental.status == 'RETURNED' %}bg-secondary{% endif %}">
+                                            {{ rental.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>${{ rental.get_total }}</td>
+                                    <td>
+                                        <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-sm btn-primary">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No orders yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

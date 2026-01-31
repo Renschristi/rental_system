@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Vendor Rentals - Rental System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Rental Orders</h2>
+    
+    {% if rentals %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rental in rentals %}
+                        <tr>
+                            <td>{{ rental.order_number }}</td>
+                            <td>
+                                <strong>{{ rental.customer.get_full_name|default:rental.customer.username }}</strong>
+                                <br>
+                                <small class="text-muted">{{ rental.customer.email }}</small>
+                            </td>
+                            <td>{{ rental.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge {% if rental.status == 'CONFIRMED' %}bg-info{% elif rental.status == 'ACTIVE' %}bg-success{% elif rental.status == 'RETURNED' %}bg-secondary{% endif %}">
+                                    {{ rental.get_status_display }}
+                                </span>
+                            </td>
+                            <td>${{ rental.get_total }}</td>
+                            <td>
+                                <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                
+                                {% if rental.status == 'CONFIRMED' %}
+                                    <form method="post" action="{% url 'rentals:pickup_rental' rental.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success"
+                                                onclick="return confirm('Mark as picked up?')">
+                                            <i class="bi bi-box-arrow-up"></i> Pickup
+                                        </button>
+                                    </form>
+                                {% elif rental.status == 'ACTIVE' %}
+                                    <form method="post" action="{% url 'rentals:return_rental' rental.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-warning"
+                                                onclick="return confirm('Process return?')">
+                                            <i class="bi bi-box-arrow-in-down"></i> Return
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <h4>No rental orders yet</h4>
+            <p>Your rental orders will appear here.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
