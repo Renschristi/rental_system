@@ -107,6 +107,12 @@ class DownloadInvoiceView(LoginRequiredMixin, View):
     def get(self, request, invoice_id):
         invoice = get_object_or_404(Invoice, id=invoice_id, customer=request.user)
         
+        # Get vendor logo if available (from first product's vendor)
+        vendor_logo = None
+        first_line = invoice.rental_order.lines.first()
+        if first_line and first_line.product.vendor.company_logo:
+            vendor_logo = first_line.product.vendor.company_logo
+        
         # Create PDF
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="invoice_{invoice.invoice_number}.pdf"'
@@ -115,9 +121,23 @@ class DownloadInvoiceView(LoginRequiredMixin, View):
         p = canvas.Canvas(response, pagesize=letter)
         width, height = letter
         
+        # Add vendor logo if available
+        y_start = height - 1 * inch
+        if vendor_logo:
+            try:
+                from PIL import Image
+                import os
+                logo_path = vendor_logo.path
+                if os.path.exists(logo_path):
+                    # Draw logo in top right
+                    p.drawImage(logo_path, width - 2.5 * inch, height - 1.5 * inch, 
+                               width=1.5 * inch, height=1 * inch, preserveAspectRatio=True)
+            except Exception as e:
+                pass  # Skip logo if there's an error
+        
         # Title
         p.setFont("Helvetica-Bold", 20)
-        p.drawString(1 * inch, height - 1 * inch, "RENTAL INVOICE")
+        p.drawString(1 * inch, y_start, "RENTAL INVOICE")
         
         # Invoice details
         p.setFont("Helvetica", 12)
@@ -139,7 +159,28 @@ class DownloadInvoiceView(LoginRequiredMixin, View):
         p.setFont("Helvetica", 12)
         p.drawString(1 * inch, y, f"{invoice.customer.get_full_name() or invoice.customer.username}")
         y -= 0.3 * inch
-        p.drawString(1 * inch, y, f"Email: {invoice.customer.email}")
+        if invoice.customer.email:
+            p.drawString(1 * inch, y, f"Email: {invoice.customer.email}")
+            y -= 0.3 * inch
+        if invoice.customer.billing_address:
+            p.drawString(1 * inch, y, f"Address: {invoice.customer.billing_address[:50]}")
+            y -= 0.3 * inch
+        
+        # Vendor details (if available)
+        if first_line and first_line.product.vendor:
+            vendor = first_line.product.vendor
+            p.setFont("Helvetica-Bold", 14)
+            p.drawString(4.5 * inch, y, "From:")
+            y_vendor = y
+            y_vendor -= 0.3 * inch
+            p.setFont("Helvetica", 12)
+            if vendor.company_name:
+                p.drawString(4.5 * inch, y_vendor, vendor.company_name)
+                y_vendor -= 0.3 * inch
+            if vendor.gst_number:
+                p.drawString(4.5 * inch, y_vendor, f"GST: {vendor.gst_number}")
+                y_vendor -= 0.3 * inch
+        
         y -= 0.5 * inch
         
         # Rental details

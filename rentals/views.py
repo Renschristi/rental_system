@@ -269,9 +269,37 @@ class VendorRentalListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self):
         # Get rentals that contain vendor's products
-        return RentalOrder.objects.filter(
+        queryset = RentalOrder.objects.filter(
             lines__product__vendor=self.request.user
         ).distinct().order_by('-created_at')
+        
+        # Filter options from diagram
+        filter_type = self.request.GET.get('filter', '')
+        
+        # Filter: Invoiced and Paid orders only
+        if filter_type == 'paid':
+            queryset = queryset.filter(
+                invoices__status='PAID'
+            ).distinct()
+        
+        # Filter: Approaching or past return dates
+        elif filter_type == 'returning':
+            from datetime import timedelta
+            today = timezone.now().date()
+            tomorrow = today + timedelta(days=1)
+            
+            # Orders where return date is within 1 day or already passed
+            queryset = queryset.filter(
+                status='ACTIVE',
+                lines__end_date__lte=tomorrow
+            ).distinct()
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_filter'] = self.request.GET.get('filter', '')
+        return context
 
 
 class PickupRentalView(LoginRequiredMixin, View):

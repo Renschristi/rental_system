@@ -19,6 +19,13 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='CUSTOMER')
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
+    
+    # Vendor-specific fields
+    company_name = models.CharField(max_length=200, blank=True, help_text="Company name for vendors")
+    company_logo = models.ImageField(upload_to='vendor_logos/', blank=True, null=True)
+    gst_number = models.CharField(max_length=50, blank=True, help_text="GST/Tax ID")
+    billing_address = models.TextField(blank=True, help_text="Billing address")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     def is_customer(self):

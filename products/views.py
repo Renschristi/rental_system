@@ -71,6 +71,9 @@ class VendorProductCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         form.instance.vendor = self.request.user
+        # Only admin can publish products
+        if not self.request.user.is_admin():
+            form.instance.is_published = False
         messages.success(self.request, 'Product created successfully!')
         return super().form_valid(form)
 

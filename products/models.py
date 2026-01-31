@@ -35,10 +35,13 @@ class Product(models.Model):
     daily_rate = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price per day")
     
     # Status
-    is_published = models.BooleanField(default=True, help_text="Show to customers")
+    is_published = models.BooleanField(default=True, help_text="Show to customers (Admin only)")
     
     # Vendor
     vendor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products')
+    
+    # Vendor restrictions - each vendor should only see products from their category
+    # This helps in auto-splitting orders by vendor
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
